@@ -1,52 +1,20 @@
-import { Canvas } from '@react-three/fiber';
-import Polyhedron from './Polyhedron';
-import * as THREE from 'three';
-import { useMemo } from 'react';
-import { Stats, OrbitControls } from '@react-three/drei';
-import { useControls } from 'leva';
+import { Stats, OrbitControls, Environment } from '@react-three/drei';
+import { Canvas, useLoader } from '@react-three/fiber';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 export default function App() {
-  const polyhedron = useMemo(
-    () => [
-      new THREE.BoxGeometry(),
-      new THREE.SphereGeometry(0.785398),
-      new THREE.DodecahedronGeometry(0.785398)
-    ],
-    []
-  );
-
-  const options = useMemo(() => {
-    return {
-      x: { value: 0, min: 0, max: Math.PI * 2, step: 0.01 },
-      y: { value: 0, min: 0, max: Math.PI * 2, step: 0.01 },
-      z: { value: 0, min: 0, max: Math.PI * 2, step: 0.01 },
-      visible: true,
-      color: { value: 'lime' }
-    };
-  }, []);
-
-  const pA = useControls('Polyhedron A', options);
-  const pB = useControls('Polyhedron B', options);
+  const gltf = useLoader(GLTFLoader, './models/scene.glb');
 
   return (
-    <Canvas camera={{ position: [1, 2, 3] }}>
-      <Polyhedron
-        position={[-1, 1, 0]}
-        rotation={[pA.x, pA.y, pA.z]}
-        visible={pA.visible}
-        color={pA.color}
-        polyhedron={polyhedron}
+    <Canvas camera={{ position: [-0.5, 1, 2] }} shadows>
+      <Environment
+        files="sunflowers_puresky_1k.hdr"
+        background
+        ground={{ height: 10, radius: 115, scale: 100 }}
       />
-      <Polyhedron
-        position={[1, 1, 0]}
-        rotation={[pB.x, pB.y, pB.z]}
-        visible={pB.visible}
-        color={pB.color}
-        polyhedron={polyhedron}
-      />
-      <OrbitControls target-y={1} />
+      <primitive object={gltf.scene} children-0-castShadow />
+      <OrbitControls target={[0, 1, 0]} autoRotate />
       <axesHelper args={[5]} />
-      <gridHelper />
       <Stats />
     </Canvas>
   );
